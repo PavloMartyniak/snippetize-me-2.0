@@ -20,7 +20,7 @@ function App() {
   return (
     <div>
       <Header isAuth={isAuth} />
-      <div style={{ padding: "2%" }}>
+      <div>
         {isAuth ? <HomePage /> : <div>Please login to continue...</div>}
       </div>
     </div>

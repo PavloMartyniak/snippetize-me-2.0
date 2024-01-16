@@ -22,7 +22,8 @@ export const getThreadMessages = (threadId) =>
   axios.get(`/prompt/thread-messages/?thread_id=${threadId}`);
 
 export const getAllThreads = () => {
-  axios.get("/prompt/threads-list/");
+  const resp = axios.get("/prompt/threads-list/");
+  return resp;
 };
 
 export const giveThreadFeedback = (threadId, rate, userComment) =>

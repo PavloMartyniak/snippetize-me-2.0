@@ -3,7 +3,12 @@ import { useForm } from "react-hook-form";
 import { Button, CircularProgress, TextField } from "@mui/material";
 import { useSelector } from "react-redux";
 import BaseSelect from "../components/BaseSelect";
-import { createThread, getThreadMessages, getThreadStatus } from "../utils";
+import {
+  createThread,
+  getAllThreads,
+  getThreadMessages,
+  getThreadStatus,
+} from "../utils";
 import UserMessageBlock from "../components/UserMessageBlock";
 import AssistantMessageBlock from "../components/AssistantMessageBlock";
 
@@ -32,6 +37,7 @@ const HomePage = () => {
   const [messages, setMesages] = React.useState([]);
   const [threadId, setThreadId] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [allThreads, setAllThreads] = React.useState([]);
 
   const checkThreadStatus = async (id) => {
     setThreadId(id);
@@ -52,9 +58,43 @@ const HomePage = () => {
       .catch((err) => console.log(err));
   };
 
+  const getAllThreadsList = async () => {
+    const data = await getAllThreads();
+    setAllThreads(data.data);
+  };
+
+  React.useEffect(() => {
+    getAllThreadsList();
+    threadId &&
+      getThreadMessages(threadId)
+        .then((data) => setMesages(data.data))
+        .catch((err) => console.log(err));
+  }, [threadId]);
+
   return (
-    <div>
+    <div style={{ display: "flex", maxHeight: "93vh" }}>
+      <div
+        style={{
+          overflow: "auto",
+          width: "10%",
+          paddingLeft: 20,
+          backgroundColor: "#1E1E1E",
+          color: "white",
+        }}
+      >
+        {allThreads?.map((item) => (
+          <p onClick={() => setThreadId(item.id)} style={{ cursor: "pointer" }}>
+            {item.id}
+          </p>
+        ))}
+      </div>
       <form
+        style={{
+          width: "100%",
+          marginInline: 20,
+          overflow: "auto",
+          paddingBlock: 20,
+        }}
         onSubmit={handleSubmit(async (data) => {
           setLoading(true);
           setUserRequestMessage(data?.textMessage);
@@ -73,7 +113,7 @@ const HomePage = () => {
           resetField("textMessage");
         })}
       >
-        <div style={{ display: "flex", gap: 20, marginBottom: "2%" }}>
+        <div style={{ display: "flex", alignItems: "center", columnGap: 10 }}>
           <BaseSelect
             name="language"
             rules={{ required: "Language is required" }}
@@ -117,65 +157,43 @@ const HomePage = () => {
               )}
           />
         </div>
-        <div
-          style={{
-            marginInline: "20%",
-          }}
-        >
-          <div
-            style={{
-              justifyContent: "start",
-              display: "flex",
-              minHeight: "65vh",
-              width: "100%",
-              marginBottom: 15,
-            }}
-          >
-            <div>
-              {messages?.map((item) =>
-                item.role === "user" ? (
-                  <UserMessageBlock text={item.content} />
-                ) : (
-                  <>
-                    <AssistantMessageBlock
-                      threadId={threadId}
-                      text={item.content}
-                    />
-                  </>
-                )
-              )}
+        <div style={{ maxHeight: "85%", minHeight: "85%", overflow: "auto" }}>
+          <div>
+            {messages?.map((item) =>
+              item.role === "user" ? (
+                <UserMessageBlock text={item.content} />
+              ) : (
+                <>
+                  <AssistantMessageBlock
+                    threadId={threadId}
+                    text={item.content}
+                  />
+                </>
+              )
+            )}
 
-              {userRequestMessage && (
-                <UserMessageBlock text={userRequestMessage} />
-              )}
-              {loading && <p>Assistant is writting...</p>}
-            </div>
+            {userRequestMessage && (
+              <UserMessageBlock text={userRequestMessage} />
+            )}
+            {loading && <p>Assistant is writting...</p>}
           </div>
-          <div
-            style={{
-              justifyContent: "center",
-              alignItems: "end",
-              display: "flex",
-              width: "100%",
-              gap: 16,
-            }}
-          >
-            <TextField
-              {...register("textMessage", { required: "Message is required" })}
-              error={Boolean(errors.textMessage)}
-              sx={{ width: "100%" }}
-              id="filled-multiline-static"
-              label="Text here"
-              multiline
-              variant="filled"
-              helperText={
-                Boolean(errors.textMessage) ? errors.textMessage.message : null
-              }
-            />
-            <Button type="submit" variant="contained" color="primary">
-              {loading ? <CircularProgress color="inherit" /> : "SEND"}
-            </Button>
-          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "start", columnGap: 10 }}>
+          <TextField
+            {...register("textMessage", { required: "Message is required" })}
+            error={Boolean(errors.textMessage)}
+            sx={{ width: "100%" }}
+            id="filled-multiline-static"
+            label="Text here"
+            multiline
+            variant="filled"
+            helperText={
+              Boolean(errors.textMessage) ? errors.textMessage.message : null
+            }
+          />
+          <Button type="submit" variant="contained" color="primary">
+            {loading ? <CircularProgress color="inherit" /> : "SEND"}
+          </Button>
         </div>
       </form>
     </div>
