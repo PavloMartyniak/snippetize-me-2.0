@@ -1,17 +1,13 @@
 import React from "react";
 import CodeFormater from "./CodeFormater";
-import RateReviewIcon from "@mui/icons-material/RateReview";
-import { IconButton, Tooltip } from "@mui/material";
-import FeedbackModal from "./FeedbackModal";
+import { Box, Typography } from "@mui/material";
 
 const AssistantMessageBlock = ({ text, threadId }) => {
-  const [isModalOpen, setModalOpen] = React.useState(false);
-
   const parts =
     text.split(/(```[\s\S]*?```)/); /*check if text have parts of code*/
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", columnGap: 10 }}>
+    <>
+      <Box sx={{ display: "flex", alignItems: "center", columnGap: 1.5 }}>
         <div
           style={{
             width: 25,
@@ -20,14 +16,13 @@ const AssistantMessageBlock = ({ text, threadId }) => {
             backgroundColor: "blue",
           }}
         />
-        <p style={{ fontWeight: "bold" }}>Assistant</p>
-      </div>
-      <div
-        style={{
-          marginLeft: 35,
+        <Typography sx={{ fontWeight: "bold" }}>Assistant</Typography>
+      </Box>
+      <Box
+        sx={{
+          marginLeft: 5,
           display: "flex",
           flexDirection: "column",
-          gap: 15,
         }}
       >
         {parts.map((part, index) => {
@@ -38,19 +33,11 @@ const AssistantMessageBlock = ({ text, threadId }) => {
             return <CodeFormater key={index} code={code} language={language} />;
           } else {
             // Non-code part
-            return <div key={index}>{part}</div>;
+            return <Typography key={index}>{part}</Typography>;
           }
         })}
-        <div style={{ display: "flex" }}>
-          <Tooltip title="Leave feedback">
-            <IconButton onClick={() => setModalOpen(true)}>
-              <RateReviewIcon />
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
-      <FeedbackModal id={threadId} open={isModalOpen} setOpen={setModalOpen} />
-    </div>
+      </Box>
+    </>
   );
 };
 
